@@ -1,0 +1,80 @@
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Graph graph = new Graph();
+        Scanner scanner = new Scanner(System.in);
+
+        // Exemplo inicial
+        graph.addCity("A");
+        graph.addCity("B");
+        graph.addCity("C");
+        graph.addCity("D");
+        graph.addCity("E");
+        graph.addEdge("A", "B", 10, 5);
+        graph.addEdge("B", "C", 20, 15);
+        graph.addEdge("C", "E", 25, 10);
+        graph.addEdge("B", "D", 30, 20);
+        graph.addEdge("A", "E", 50, 40);
+
+        while (true) {
+            System.out.println("\n--- CargoFast - Gerenciador de Rotas ---");
+            System.out.println("1. Adicionar Cidade");
+            System.out.println("2. Adicionar Estrada");
+            System.out.println("3. Remover Estrada (Bloqueio)");
+            System.out.println("4. Calcular Rota");
+            System.out.println("5. Sair");
+            System.out.print("Escolha uma opção: ");
+            int choice = scanner.nextInt();
+            scanner.nextLine();
+
+            switch (choice) {
+                case 1 -> {
+                    System.out.print("Nome da Cidade: ");
+                    String city = scanner.nextLine();
+                    graph.addCity(city);
+                }
+                case 2 -> {
+                    System.out.print("Cidade de Origem: ");
+                    String from = scanner.nextLine();
+                    System.out.print("Cidade de Destino: ");
+                    String to = scanner.nextLine();
+                    System.out.print("Distância (km): ");
+                    int distance = scanner.nextInt();
+                    System.out.print("Custo: ");
+                    int cost = scanner.nextInt();
+                    graph.addEdge(from, to, distance, cost);
+                }
+                case 3 -> {
+                    System.out.print("Cidade de Origem: ");
+                    String from = scanner.nextLine();
+                    System.out.print("Cidade de Destino: ");
+                    String to = scanner.nextLine();
+                    graph.removeEdge(from, to);
+                }
+                case 4 -> {
+                    System.out.print("Cidade de Partida: ");
+                    String start = scanner.nextLine();
+                    System.out.print("Cidade de Destino: ");
+                    String end = scanner.nextLine();
+                    System.out.print("Custo Máximo (0 para ignorar): ");
+                    int maxCost = scanner.nextInt();
+                    boolean prioritizeDistance = maxCost == 0;
+
+                    System.out.println("\nCalculando Rota...");
+                    var route = graph.findOptimalPath(start, end, maxCost, prioritizeDistance);
+                    if (route.isEmpty()) {
+                        System.out.println("Nenhuma rota disponível.");
+                    } else {
+                        System.out.println("Rota ótima: " + route);
+                    }
+                }
+                case 5 -> {
+                    System.out.println("Saindo...");
+                    return;
+                }
+                default -> System.out.println("Opção inválida.");
+            }
+        }
+    }
+}
