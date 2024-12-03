@@ -1,0 +1,88 @@
+import java.util.*;
+
+class Graph {
+    private final Map<String, List<Edge>> adjacencyList = new HashMap<>();
+
+    static class Edge {
+        String destination;
+        int distance;
+        int cost;
+
+        Edge(String destination, int distance, int cost) {
+            this.destination = destination;
+            this.distance = distance;
+            this.cost = cost;
+        }
+    }
+
+    // Adiciona uma cidade ao grafo
+    public void addCity(String city) {
+        adjacencyList.putIfAbsent(city, new ArrayList<>());
+    }
+
+    // Adiciona uma estrada entre duas cidades
+    public void addEdge(String from, String to, int distance, int cost) {
+        adjacencyList.get(from).add(new Edge(to, distance, cost));
+        adjacencyList.get(to).add(new Edge(from, distance, cost)); // Grafo não direcionado
+    }
+
+    // Remove uma estrada
+    public void removeEdge(String from, String to) {
+        adjacencyList.get(from).removeIf(edge -> edge.destination.equals(to));
+        adjacencyList.get(to).removeIf(edge -> edge.destination.equals(from));
+    }
+
+    // Algoritmo de Dijkstra para encontrar o caminho ótimo
+    public List<String> findOptimalPath(String start, String end, int maxCost, boolean prioritizeDistance) {
+        PriorityQueue<PathNode> queue = new PriorityQueue<>(Comparator.comparingInt(node -> node.total));
+        Map<String, Integer> bestCosts = new HashMap<>();
+        Map<String, String> previous = new HashMap<>();
+
+        queue.add(new PathNode(start, 0, 0));
+        bestCosts.put(start, 0);
+
+        while (!queue.isEmpty()) {
+            PathNode current = queue.poll();
+
+            if (current.city.equals(end)) {
+                return reconstructPath(previous, end);
+            }
+
+            for (Edge edge : adjacencyList.getOrDefault(current.city, new ArrayList<>())) {
+                int newDistance = current.distance + edge.distance;
+                int newCost = current.cost + edge.cost;
+                int newTotal = prioritizeDistance ? newDistance : newCost;
+
+                if ((prioritizeDistance || newCost <= maxCost) &&
+                        (!bestCosts.containsKey(edge.destination) || newTotal < bestCosts.get(edge.destination))) {
+                    bestCosts.put(edge.destination, newTotal);
+                    previous.put(edge.destination, current.city);
+                    queue.add(new PathNode(edge.destination, newDistance, newCost));
+                }
+            }
+        }
+        return Collections.emptyList(); // Nenhuma rota encontrada
+    }
+
+    private List<String> reconstructPath(Map<String, String> previous, String end) {
+        List<String> path = new LinkedList<>();
+        for (String at = end; at != null; at = previous.get(at)) {
+            path.add(0, at);
+        }
+        return path;
+    }
+
+    static class PathNode {
+        String city;
+        int distance;
+        int cost;
+        int total;
+
+        PathNode(String city, int distance, int cost) {
+            this.city = city;
+            this.distance = distance;
+            this.cost = cost;
+            this.total = distance + cost;
+        }
+    }
+}
